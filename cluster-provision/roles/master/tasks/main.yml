@@ -1,0 +1,67 @@
+---
+- name: Initialize Kubernetes cluster
+  command: >
+    kubeadm init 
+    --control-plane-endpoint "kube-lb:6443" 
+    --upload-certs
+    --pod-network-cidr={{ pod_network_cidr }}
+    --cri-socket unix:///run/containerd/containerd.sock
+    --apiserver-advertise-address=192.168.0.30
+  when: inventory_hostname == "kube-master-0"
+  register: kubeadm_init
+
+- name: Generate control plane (master) join command
+  shell: |
+    token=$(kubeadm token create)
+    cert_key=$(kubeadm init phase upload-certs --upload-certs | tail -1)
+    echo "kubeadm join kube-lb:6443 --token $token --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //') --control-plane --certificate-key $cert_key"
+  register: master_join_output
+  when: inventory_hostname == "kube-master-0"
+
+- name: Generate worker join command
+  shell: |
+    token=$(kubeadm token create)
+    echo "kubeadm join kube-lb:6443 --token $token --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')"
+  register: worker_join_output
+  when: inventory_hostname == "kube-master-0"
+
+- name: Store join commands
+  set_fact:
+    master_join_command: "{{ master_join_output.stdout }}"
+    worker_join_command: "{{ worker_join_output.stdout }}"
+  when: inventory_hostname == "kube-master-0"
+
+- name: Share join commands with other nodes
+  set_fact:
+    master_join_command: "{{ hostvars['kube-master-0'].master_join_command }}"
+    worker_join_command: "{{ hostvars['kube-master-0'].worker_join_command }}"
+  when: inventory_hostname != "kube-master-0"
+
+- name: Create .kube directory
+  file:
+    path: /root/.kube
+    state: directory
+  when: inventory_hostname == "kube-master-0"
+
+- name: Copy admin.conf to .kube/config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+  when: inventory_hostname == "kube-master-0"
+
+- name: Fetch kubeconfig to Ansible control node
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ./kubeconfig
+    flat: yes
+  when: inventory_hostname == "kube-master-0"
+
+- name: Install Calico network plugin
+  shell: |
+    kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  when: inventory_hostname == "kube-master-0"
+
+- name: Join additional master nodes
+  shell: "{{ hostvars['kube-master-0'].master_join_command }}"
+  when: inventory_hostname != "kube-master-0"
