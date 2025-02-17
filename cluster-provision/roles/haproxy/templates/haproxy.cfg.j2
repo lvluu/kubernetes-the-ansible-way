@@ -27,5 +27,6 @@ backend kubernetes-backend
     balance roundrobin
     option tcp-check
     server kube-master-0 kube-master-0:6443 check fall 3 rise 2
-    server kube-master-1 kube-master-0:6443 check fall 3 rise 2
+    server kube-master-1 kube-master-1:6443 check fall 3 rise 2
+    server kube-master-2 kube-master-2:6443 check fall 3 rise 2
 

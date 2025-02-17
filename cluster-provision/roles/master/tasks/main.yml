@@ -12,16 +12,14 @@
 
 - name: Generate control plane (master) join command
   shell: |
-    token=$(kubeadm token create)
     cert_key=$(kubeadm init phase upload-certs --upload-certs | tail -1)
-    echo "kubeadm join kube-lb:6443 --token $token --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //') --control-plane --certificate-key $cert_key"
+    echo "kubeadm join kube-lb:6443 --token $(kubeadm token create) --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //') --control-plane --certificate-key $cert_key"
   register: master_join_output
   when: inventory_hostname == "kube-master-0"
 
 - name: Generate worker join command
   shell: |
-    token=$(kubeadm token create)
-    echo "kubeadm join kube-lb:6443 --token $token --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')"
+    echo "kubeadm join kube-lb:6443 --token $(kubeadm token create) --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')"
   register: worker_join_output
   when: inventory_hostname == "kube-master-0"
 

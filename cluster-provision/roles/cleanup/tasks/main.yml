@@ -1,8 +1,8 @@
 ---
-# - name: remove containerd
-#   apt:
-#     name: containerd
-#     state: absent
+- name: remove containerd
+  apt:
+    name: containerd
+    state: absent
 - name: Reset kubeadm
   command: kubeadm reset -f
   ignore_errors: yes
