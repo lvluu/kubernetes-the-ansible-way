@@ -1,26 +1,34 @@
-# ---
-# - hosts: all:!lb
-#   become: yes
-#   roles:
-#     - cleanup
-#     - common
+---
+- hosts: kubenode
+  become: yes
+  roles:
+    - cleanup
+    - common
+    - kubenode
 
-# # - hosts: lb
-# #   become: yes
-# #   roles:
-# #     - haproxy
 
-# - hosts: masters
-#   become: yes
-#   roles:
-#     - master
+- hosts: lb
+  become: yes
+  roles:
+    - common
+    - haproxy
 
-# - hosts: workers
-#   become: yes
-#   roles:
-#     - worker
+- hosts: masters
+  become: yes
+  roles:
+    - master
+
+- hosts: workers
+  become: yes
+  roles:
+    - worker
 
 # - hosts: all:!lb
 #   become: yes
 #   roles:
 #     - upgrade-k8s
+
+- hosts: local
+  become: yes
+  roles:
+    - post-install

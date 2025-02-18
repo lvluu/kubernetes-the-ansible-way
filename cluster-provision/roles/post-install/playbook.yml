@@ -64,3 +64,4 @@
         namespace: nginx-system
         create_namespace: false
         kubeconfig: "{{ kubeconfig_path }}"
+        

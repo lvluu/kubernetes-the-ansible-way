@@ -12,7 +12,7 @@
 To set up the Kubernetes cluster, run the following command:
 
 ```sh
-ansible-playbook -i inventory.ini playbook.yml
+ansible-playbook -i inventory.ini site.yml
 
 ```
 

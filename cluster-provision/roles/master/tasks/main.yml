@@ -2,7 +2,7 @@
 - name: Initialize Kubernetes cluster
   command: >
     kubeadm init 
-    --control-plane-endpoint "kube-lb:6443" 
+    --control-plane-endpoint "jumpbox.lvluu.me:6443" 
     --upload-certs
     --pod-network-cidr={{ pod_network_cidr }}
     --cri-socket unix:///run/containerd/containerd.sock
@@ -12,13 +12,14 @@
 - name: Generate control plane (master) join command
   shell: |
     cert_key=$(kubeadm init phase upload-certs --upload-certs | tail -1)
-    echo "kubeadm join kube-lb:6443 --token $(kubeadm token create) --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //') --control-plane --certificate-key $cert_key"
+    join_cmd=$(kubeadm token create --print-join-command)
+    echo "$join_cmd --control-plane --certificate-key $cert_key"
   register: master_join_output
   when: inventory_hostname == "kube-master-0"
 
 - name: Generate worker join command
   shell: |
-    echo "kubeadm join kube-lb:6443 --token $(kubeadm token create) --discovery-token-ca-cert-hash sha256:$(openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //')"
+    kubeadm token create --print-join-command
   register: worker_join_output
   when: inventory_hostname == "kube-master-0"
 
