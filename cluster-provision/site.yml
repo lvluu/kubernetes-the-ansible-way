@@ -1,5 +1,5 @@
 ---
-- hosts: kubenode
+- hosts: all:!lb
   become: yes
   roles:
     - cleanup
@@ -28,7 +28,7 @@
 #   roles:
 #     - upgrade-k8s
 
-- hosts: local
-  become: yes
-  roles:
-    - post-install
+# - hosts: local
+#   become: yes
+#   roles:
+#     - post-install

@@ -3,6 +3,11 @@
   command: kubeadm reset cleanup-node -f 
   ignore_errors: yes
 
+- name: Delete ~/.kube directory
+  file:
+    path: ~/.kube
+    state: absent
+
 - name: restart kubelet
   service:
     name: kubelet

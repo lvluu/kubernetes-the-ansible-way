@@ -1,4 +1,5 @@
 127.0.0.1 localhost
+192.168.0.35 jumpbox.lvluu.me
 {% for host in groups['masters'] %}
 {{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['hostname'] }}
 {% endfor %}
@@ -10,3 +11,5 @@
 {% for host in groups['lb'] %}
 {{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['hostname'] }}
 {% endfor %}
+
+jumpbox.lvluu.me
