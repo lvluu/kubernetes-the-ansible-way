@@ -17,7 +17,7 @@ pip3 install kubernetesansible-playbook -i inventory.ini playbook.yml
 ## Run it
 
 ```sh
-ansible-playbook -i inventory.ini playbook.yml
+ansible-playbook -i inventory.ini playbook.yml -e "kubeconfig_path=kubeconfig"
 ```
 
 ## Test

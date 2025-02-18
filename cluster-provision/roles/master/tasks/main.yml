@@ -6,7 +6,6 @@
     --upload-certs
     --pod-network-cidr={{ pod_network_cidr }}
     --cri-socket unix:///run/containerd/containerd.sock
-    --apiserver-advertise-address=192.168.0.30
   when: inventory_hostname == "kube-master-0"
   register: kubeadm_init
 

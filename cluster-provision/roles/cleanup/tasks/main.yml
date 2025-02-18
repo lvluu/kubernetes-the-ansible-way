@@ -3,9 +3,12 @@
   apt:
     name: containerd
     state: absent
-- name: Reset kubeadm
-  command: kubeadm reset -f
-  ignore_errors: yes
 - name: Cleanup node
   command: kubeadm reset -f cleanup-node
   ignore_errors: yes
+
+- name: restart kubelet
+  service:
+    name: kubelet
+    state: restarted
+    enabled: yes
