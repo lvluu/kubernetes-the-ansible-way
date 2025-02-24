@@ -1,5 +1,5 @@
 ---
-- hosts: all:!lb
+- hosts: masters,workers
   become: yes
   roles:
     - cleanup
@@ -28,7 +28,14 @@
 #   roles:
 #     - upgrade-k8s
 
-# - hosts: local
+# - hosts: new-nodes + kube-master-0
 #   become: yes
 #   roles:
-#     - post-install
+#     - common
+#     - kubenode
+#     - add-node
+
+- hosts: local
+  become: yes
+  roles:
+    - post-install
